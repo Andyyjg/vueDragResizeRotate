@@ -42,7 +42,7 @@
         name: 'vue-drag-resize',
         props: {
             rotate: {
-                type: Boolean,default: false
+                type: Boolean, default: true
             },
             border: {},
             bgColor: {
@@ -274,15 +274,37 @@
                 this.rotateStart = [e.clientX, e.clientY]
 
                 var self = this
-                const listener = event => {
 
+
+                var clientX=0,clientY=0
+                // const listener = e => {
+                //         //兼容ie ie下没有movement
+                //         var movementX=0,movementY=0
+
+                //         clientX=e.clientX
+                //         clientY=e.clientY
+                //
+                //         this.lines[this.moveIndex].x += movementX
+                //         this.lines[this.moveIndex].y += movementY
+                const listener = event => {
+                    var movementX=0,movementY=0
+                    if(clientX!=0){
+                        movementX=event.clientX-clientX
+                    }else{
+                        movementX=0
+                    }
+                    if(clientY!=0){
+                        movementY=event.clientY-clientY
+                    }else{
+                        movementX=0
+                    }
                     var direction = -1
                     var el = document.getElementById(this.id)
                     var h = el.offsetHeight, w = el.offsetWidth
-                    var deg = event.movementY ? event.movementY / h * 180 : event.movementX / w * 180
+                    var deg = movementY ? movementY / h * 180 : movementX / w * 180
                     deg = Math.abs(deg)
                     //判断转向 顺时针or 逆时针
-                    if (((event.clientX < this.rotateCenter[0] && event.movementY > 0) || (event.clientX > this.rotateCenter[0] && event.movementY < 0))) {
+                    if (((event.clientX < this.rotateCenter[0] && movementY > 0) || (event.clientX > this.rotateCenter[0] && movementY < 0))) {
                         deg = 0 - deg
                     }
                     var sDeg = this.deg
@@ -290,7 +312,8 @@
 
                     Math.abs(sDeg) > 360 ? sDeg %= 360 : true
                     this.deg = sDeg
-
+                    clientX=event.clientX
+                    clientY=event.clientY
 
                 };
                 document.body.addEventListener("mousemove", listener);
@@ -682,6 +705,9 @@
         },
 
         watch: {
+            deg(){
+                this.$emit('rotate',this.deg)
+            },
             rawLeft(newLeft) {
                 const limits = this.limits;
                 const stickAxis = this.stickAxis;
@@ -901,6 +927,7 @@
         position: absolute;
         box-sizing: border-box;
 
+
     }
 
     span.rotate {
@@ -921,10 +948,13 @@
         width: 100%;
         height: 100%;
         position: absolute;
-        top: 0;
-        left: 0;
-        box-sizing: border-box;
-        outline: 1px solid #28F0FF;
+        top: -3px;
+        left:-3px;
+        box-sizing: content-box;
+
+        outline: 6px solid transparent;
+
+        border: 3px solid #28F0FF;
     }
 
     .vdr-stick {
@@ -965,5 +995,6 @@
     .vdr.active:before {
         cursor: move;
         /*显示移动光标*/
+
     }
 </style>
